@@ -6,6 +6,7 @@ Este projeto foi desenvolvido como parte da disciplina **Desenvolvimento de Disp
 - **Emanoell Carvalho**
 - **Gabriel Vinicius**
 - **Cleiton Lucas**
+- **Gean de LIma**
 
 ## Objetivo
 O objetivo deste projeto é criar um **jogo de xadrez** para dispositivos móveis, proporcionando uma experiência intuitiva e divertida para os usuários.
