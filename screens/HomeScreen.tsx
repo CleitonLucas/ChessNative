@@ -25,13 +25,13 @@ export default function HomeScreen() {
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Escolha o modo de jogo</Text>
-            <TouchableOpacity style={styles.button} onPress={() => handleModeSelect('Clássico')}>
+            <TouchableOpacity style={styles.button} onPress={() => handleModeSelect('classic')}>
               <Text style={styles.buttonText}>Modo Clássico</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.button} onPress={() => handleModeSelect('Rápido')}>
+            <TouchableOpacity style={styles.button} onPress={() => handleModeSelect('rapid')}>
               <Text style={styles.buttonText}>Modo Rápido</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.button} onPress={() => handleModeSelect('Blitz')}>
+            <TouchableOpacity style={styles.button} onPress={() => handleModeSelect('blitz')}>
               <Text style={styles.buttonText}>Modo Blitz</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.closeButton} onPress={() => setModalVisible(false)}>

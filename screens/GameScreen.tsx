@@ -24,13 +24,14 @@ export default function GameScreen() {
     const timerRef = useRef<NodeJS.Timeout | null>(null);
 
     const route = useRoute<GameRouteProp>();
-    const mode = route.params?.mode as GameMode;
+    const mode = (route.params?.mode as GameMode) ?? 'classic'; 
+    const initialTime = initialTimeByMode[mode] ?? 1800;       
 
     const [ capturedWhitePieces, setCapturedWhitePieces] = useState<Piece[]>([]);
     const [capturedBlackPieces, setCapturedBlackPieces] = useState<Piece[]>([]);
 
-    const [whiteTime, setWhiteTime] = useState(initialTimeByMode[mode]);
-    const [blackTime, setBlackTime] = useState(initialTimeByMode[mode]);
+    const [whiteTime, setWhiteTime] = useState(initialTime);
+    const [blackTime, setBlackTime] = useState(initialTime);
 
     const [pieces, setPieces] = useState<Piece[]>(initialPieces);
     const [selectedPiece, setSelectedPiece] = useState<Piece | null>(null);
@@ -45,11 +46,11 @@ export default function GameScreen() {
     const player2Avatar = require('../assets/venom.jpg');
 
     const formatTime = (seconds: number) => {
+        if (typeof seconds !== 'number' || isNaN(seconds)) return '00 : 00';
         const mins = Math.floor(seconds / 60).toString().padStart(2, '0');
         const secs = (seconds % 60).toString().padStart(2, '0');
         return `${mins} : ${secs}`;
     };
-
 
     const resetGame = () => {
         setPieces(initialPieces);
@@ -60,6 +61,8 @@ export default function GameScreen() {
         setEnPassantTarget(null);
         setHalfMoveClock(0);
         setDrawRequest(null);
+        setCapturedWhitePieces([]);
+        setCapturedBlackPieces([]);
     };
 
     const handleRequestDraw = () => {
@@ -93,7 +96,6 @@ export default function GameScreen() {
             !targetPiece;
 
         let updatedPieces = pieces;
-
         const isCapture = !!targetPiece || isEnPassantCapture;
 
         if (isCapture && targetPiece) {
@@ -106,7 +108,6 @@ export default function GameScreen() {
 
         const isPawnMove = selectedPiece.type === "pawn";
 
-        // Captura normal ou En Passant
         if (isEnPassantCapture) {
             const direction = selectedPiece.color === "white" ? 1 : -1;
             const capturedPawnRow = row + direction;
@@ -119,7 +120,6 @@ export default function GameScreen() {
             );
         }
 
-        // Roque
         const isKingSideCastle =
             selectedPiece.type === "king" &&
             Math.abs(col - selectedPiece.col) === 2 &&
@@ -143,7 +143,6 @@ export default function GameScreen() {
             });
         }
 
-        // Move peça selecionada
         updatedPieces = updatedPieces.map(p => {
             if (p.row === selectedPiece.row && p.col === selectedPiece.col) {
                 return { ...p, row, col, hasMoved: true };
@@ -153,7 +152,6 @@ export default function GameScreen() {
 
         const movedPiece = updatedPieces.find(p => p.row === row && p.col === col);
 
-        // Promoção
         const promotionRow = movedPiece?.color === 'white' ? 0 : 7;
         if (movedPiece?.type === 'pawn' && row === promotionRow) {
             setPromotionPending({ row, col, color: movedPiece.color });
@@ -165,7 +163,6 @@ export default function GameScreen() {
             return;
         }
 
-        // En Passant target
         let newEnPassantTarget: { row: number; col: number } | null = null;
         if (
             movedPiece?.type === 'pawn' &&
@@ -175,12 +172,9 @@ export default function GameScreen() {
             newEnPassantTarget = { row: enPassantRow, col };
         }
 
-        // Atualizar half move clock
         const nextHalfMoveClock = isPawnMove || isCapture ? 0 : halfMoveClock + 1;
-
         const nextTurn = turn === 'white' ? 'black' : 'white';
 
-        // Atualizar estados
         setPieces(updatedPieces);
         setSelectedPiece(null);
         setValidMoves([]);
@@ -189,14 +183,9 @@ export default function GameScreen() {
         setTurn(nextTurn);
         setDrawRequest(null);
 
-        // Verificar empates e status
         setTimeout(() => {
             if (isFiftyMoveRule(nextHalfMoveClock)) {
-                Alert.alert(
-                    "Empate pela regra dos 50 lances",
-                    "Nenhuma captura ou movimento de peão foi feito nos últimos 50 lances.",
-                    [{ text: "OK", onPress: resetGame }]
-                );
+                Alert.alert("Empate pela regra dos 50 lances", "", [{ text: "OK", onPress: resetGame }]);
                 return;
             }
 
@@ -205,30 +194,21 @@ export default function GameScreen() {
             const isOpponentStalemate = isStalemate(nextTurn, updatedPieces);
 
             if (isOpponentCheckmate) {
-                Alert.alert(
-                    "Cheque-mate",
-                    `Vitória das ${turn === 'white' ? 'brancas' : 'pretas'}!`,
-                    [{ text: "OK", onPress: resetGame }]
-                );
+                Alert.alert("Cheque-mate", `Vitória das ${turn === 'white' ? 'brancas' : 'pretas'}!`, [
+                    { text: "OK", onPress: resetGame }
+                ]);
             } else if (isOpponentStalemate) {
-                Alert.alert(
-                    "Empate",
-                    "Empate por afogamento!",
-                    [{ text: "OK", onPress: resetGame }]
-                );
+                Alert.alert("Empate", "Empate por afogamento!", [
+                    { text: "OK", onPress: resetGame }
+                ]);
             } else if (isOpponentInCheck) {
-                Alert.alert(
-                    "Cheque",
-                    `As ${nextTurn === 'white' ? 'brancas' : 'pretas'} estão em cheque!`
-                );
+                Alert.alert("Cheque", `As ${nextTurn === 'white' ? 'brancas' : 'pretas'} estão em cheque!`);
             }
         }, 100);
     };
 
     useEffect(() => {
-        if (timerRef.current) {
-            clearInterval(timerRef.current);
-        }
+        if (timerRef.current) clearInterval(timerRef.current);
 
         timerRef.current = setInterval(() => {
             if (turn === 'white') {
@@ -257,17 +237,13 @@ export default function GameScreen() {
         }, 1000);
 
         return () => {
-            if (timerRef.current) {
-                clearInterval(timerRef.current);
-            }
+            if (timerRef.current) clearInterval(timerRef.current);
         };
     }, [turn]);
 
     useEffect(() => {
         return () => {
-            if (timerRef.current) {
-                clearInterval(timerRef.current);
-            }
+            if (timerRef.current) clearInterval(timerRef.current);
         };
     }, []);
 
@@ -291,11 +267,7 @@ export default function GameScreen() {
 
         setTimeout(() => {
             if (isFiftyMoveRule(halfMoveClock)) {
-                Alert.alert(
-                    "Empate pela regra dos 50 lances",
-                    "Nenhuma captura ou movimento de peão foi feito nos últimos 50 lances.",
-                    [{ text: "OK", onPress: resetGame }]
-                );
+                Alert.alert("Empate pela regra dos 50 lances", "", [{ text: "OK", onPress: resetGame }]);
                 return;
             }
 
@@ -304,22 +276,15 @@ export default function GameScreen() {
             const isOpponentStalemate = isStalemate(nextTurn, updatedPieces);
 
             if (isOpponentCheckmate) {
-                Alert.alert(
-                    "Cheque-mate",
-                    `Vitória das ${turn === 'white' ? 'brancas' : 'pretas'}!`,
-                    [{ text: "OK", onPress: resetGame }]
-                );
+                Alert.alert("Cheque-mate", `Vitória das ${turn === 'white' ? 'brancas' : 'pretas'}!`, [
+                    { text: "OK", onPress: resetGame }
+                ]);
             } else if (isOpponentStalemate) {
-                Alert.alert(
-                    "Empate",
-                    "Empate por afogamento!",
-                    [{ text: "OK", onPress: resetGame }]
-                );
+                Alert.alert("Empate", "Empate por afogamento!", [
+                    { text: "OK", onPress: resetGame }
+                ]);
             } else if (isOpponentInCheck) {
-                Alert.alert(
-                    "Cheque",
-                    `As ${nextTurn === 'white' ? 'brancas' : 'pretas'} estão em cheque!`
-                );
+                Alert.alert("Cheque", `As ${nextTurn === 'white' ? 'brancas' : 'pretas'} estão em cheque!`);
             }
         }, 100);
     };
@@ -388,16 +353,10 @@ export default function GameScreen() {
                             As {drawRequest === 'white' ? 'brancas' : 'pretas'} propõem empate. Aceitar?
                         </Text>
                         <View style={styles.piecesRow}>
-                            <Pressable
-                                style={styles.pieceButton}
-                                onPress={resetGame}
-                            >
+                            <Pressable style={styles.pieceButton} onPress={resetGame}>
                                 <Text style={styles.pieceText}>Aceitar</Text>
                             </Pressable>
-                            <Pressable
-                                style={styles.pieceButton}
-                                onPress={() => setDrawRequest(null)}
-                            >
+                            <Pressable style={styles.pieceButton} onPress={() => setDrawRequest(null)}>
                                 <Text style={styles.pieceText}>Rejeitar</Text>
                             </Pressable>
                         </View>
@@ -457,4 +416,3 @@ const styles = StyleSheet.create({
         color: 'white',
     },
 });
-
