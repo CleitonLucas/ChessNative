@@ -1,29 +1,59 @@
-import React from 'react';
-import { View, Text, StyleSheet, Image } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, Image, Animated } from 'react-native';
 
 interface Props {
   avatar: any;
   name: string;
   rank: string;
   time: string;
+  isActiveTurn: boolean;
 }
 
-export default function PlayerProfile({ avatar, name, rank, time }: Props) {
+export default function PlayerProfile({ avatar, name, rank, time, isActiveTurn }: Props) {
+  const pulseAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    if (isActiveTurn) {
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(pulseAnim, {
+            toValue: 1,
+            duration: 800,
+            useNativeDriver: false,
+          }),
+          Animated.timing(pulseAnim, {
+            toValue: 0,
+            duration: 800,
+            useNativeDriver: false,
+          }),
+        ])
+      ).start();
+    } else {
+      pulseAnim.stopAnimation();
+      pulseAnim.setValue(0);
+    }
+  }, [isActiveTurn]);
+
+  const borderColor = pulseAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['#00C851', '#009432'], // verde claro -> verde escuro
+  });
+
   return (
     <View style={styles.container}>
-      <View style={styles.profileBox}>
+      <Animated.View style={[styles.profileBox, isActiveTurn && { borderColor }]}>
         <Image source={avatar} style={styles.avatar} />
         <Text style={styles.name}>{name}</Text>
         <View style={styles.divider} />
         <Text style={styles.rank}>{rank}</Text>
-      </View>
-      <View style={styles.timerBox}>
+      </Animated.View>
+
+      <Animated.View style={[styles.timerBox, isActiveTurn && { borderColor }]}>
         <Text style={styles.time}>{time}</Text>
-      </View>
+      </Animated.View>
     </View>
   );
 }
-
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
@@ -79,4 +109,3 @@ const styles = StyleSheet.create({
     color: '#3C2F2F',
   },
 });
-

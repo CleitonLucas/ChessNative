@@ -1,6 +1,5 @@
-//Board.tsx
 import React from 'react';
-import { View, Text, StyleSheet, Pressable } from 'react-native';
+import { View, StyleSheet, Pressable, ImageBackground } from 'react-native';
 import { Piece } from '../utils/types';
 import PieceComponent from './Piece';
 
@@ -13,6 +12,9 @@ interface Props {
 }
 
 export default function Board({ pieces, selectedPiece, validMoves, onSelectPiece, onMove }: Props) {
+    const lightSquareTexture = require('../assets/textures/white_wood.png');
+    const darkSquareTexture = require('../assets/textures/black_wood.png');
+
     const renderSquares = () => {
         const squares = [];
         for (let row = 0; row < 8; row++) {
@@ -31,20 +33,30 @@ export default function Board({ pieces, selectedPiece, validMoves, onSelectPiece
                     <Pressable
                         key={`${row}-${col}`}
                         onPress={() => onMove(row, col)}
-                        style={[
-                            styles.square,
-                            { backgroundColor: isWhite ? '#f0d9b5' : '#b58863' },
-                            hasEnemyPiece && isValidMove && { borderWidth: 2, borderColor: 'green' },
-                        ]}
+                        style={styles.square}
                     >
-                        {isValidMove && !hasEnemyPiece && <View style={styles.moveIndicator} />}
+                        <ImageBackground
+                            source={isWhite ? lightSquareTexture : darkSquareTexture}
+                            style={styles.square}
+                            imageStyle={{ resizeMode: 'cover' }}
+                        >
+                            <View
+                                style={[
+                                    styles.overlay,
+                                    {
+                                        backgroundColor: isWhite ? 'black' : 'white',
+                                        opacity: isWhite ? 0.05 : 0.09, 
+                                    },
+                                ]}
+                            />
+                            {isValidMove && !hasEnemyPiece && <View style={styles.moveIndicator} />}
+                        </ImageBackground>
                     </Pressable>
                 );
             }
         }
         return squares;
     };
-
     return (
         <View style={styles.container}>
             <View style={styles.board}>
@@ -89,6 +101,10 @@ const styles = StyleSheet.create({
         height: 320,
         flexDirection: 'row',
         flexWrap: 'wrap',
+        borderColor: '#ccc',
+    },
+    overlay: {
+        ...StyleSheet.absoluteFillObject,
     },
     square: {
         width: 40,

@@ -23,7 +23,7 @@ export default function CapturedPieces({ pieces }: Props) {
 
   return (
     <ImageBackground
-      source={require('../assets/wood_texture.jpg')}
+      source={require('../assets/textures/wood_texture.jpg')}
       resizeMode="cover"
       style={styles.container}
       imageStyle={styles.backgroundImage}>

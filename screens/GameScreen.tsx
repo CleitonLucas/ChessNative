@@ -26,7 +26,7 @@ export default function GameScreen() {
     const route = useRoute<GameRouteProp>();
     const mode = route.params?.mode as GameMode;
 
-    const [capturedWhitePieces, setCapturedWhitePieces] = useState<Piece[]>([]);
+    const [ capturedWhitePieces, setCapturedWhitePieces] = useState<Piece[]>([]);
     const [capturedBlackPieces, setCapturedBlackPieces] = useState<Piece[]>([]);
 
     const [whiteTime, setWhiteTime] = useState(initialTimeByMode[mode]);
@@ -331,6 +331,7 @@ export default function GameScreen() {
                 name="Miranha"
                 rank="Rank 90º"
                 time={formatTime(blackTime)}
+                isActiveTurn={turn === 'black'}
             />
             <View style={{ marginVertical: 8 }}>
                 <CapturedPieces pieces={capturedWhitePieces} />
@@ -350,6 +351,7 @@ export default function GameScreen() {
                 name="Venom"
                 rank="Rank 90º"
                 time={formatTime(whiteTime)}
+                isActiveTurn={turn === 'white'}
             />
             <View style={{ flexDirection: 'row', marginTop: 10 }}>
                 <Pressable style={styles.button} onPress={handleRequestDraw}>
