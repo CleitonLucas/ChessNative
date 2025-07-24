@@ -1,6 +1,14 @@
 // screens/HomeScreen.tsx
-import React, { useState } from 'react';
-import { View, Text, Button, Modal, TouchableOpacity, StyleSheet } from 'react-native';
+import React, { useState, useRef } from 'react';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  ImageBackground,
+  TouchableWithoutFeedback,
+  Animated,
+} from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { useNavigation } from '@react-navigation/native';
@@ -9,48 +17,238 @@ type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Home'>;
 
 export default function HomeScreen() {
   const navigation = useNavigation<NavigationProp>();
-  const [modalVisible, setModalVisible] = useState(false);
+
+  const [currentModal, setCurrentModal] = useState<null | 'type' | 'online' | 'mode'>(null);
+
+  const backdropOpacity = useRef(new Animated.Value(0)).current;
+  const modalOpacity = useRef(new Animated.Value(0)).current;
+  const scale = useRef(new Animated.Value(0.8)).current;
+
+  const showModal = (type: 'type' | 'online' | 'mode') => {
+    setCurrentModal(type);
+    Animated.parallel([
+      Animated.timing(backdropOpacity, {
+        toValue: 1,
+        duration: 200,
+        useNativeDriver: true,
+      }),
+      Animated.timing(modalOpacity, {
+        toValue: 1,
+        duration: 200,
+        useNativeDriver: true,
+      }),
+      Animated.spring(scale, {
+        toValue: 1,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  };
+
+  const hideModal = (onHidden?: () => void, animate: boolean = true) => {
+    if (animate) {
+      Animated.parallel([
+        Animated.timing(backdropOpacity, {
+          toValue: 0,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+        Animated.timing(modalOpacity, {
+          toValue: 0,
+          duration: 150,
+          useNativeDriver: true,
+        }),
+        Animated.spring(scale, {
+          toValue: 0.8,
+          useNativeDriver: true,
+        }),
+      ]).start(() => {
+        setCurrentModal(null);
+        if (onHidden) onHidden();
+      });
+    } else {
+      // Fecha instantaneamente
+      backdropOpacity.setValue(0);
+      modalOpacity.setValue(0);
+      scale.setValue(0.8);
+      setCurrentModal(null);
+      if (onHidden) onHidden();
+    }
+  };
+
+  const handlePlay = () => showModal('type');
+
+  const handleLocalPlay = () => {
+    hideModal(() => showModal('mode'), false); // troca rápida
+  };
+
+  const handleOnlinePlay = () => {
+    hideModal(() => showModal('online'), false); // troca rápida
+  };
+
+  const handleOnlineOption = () => {
+    hideModal(() => showModal('mode'), false); // troca rápida
+  };
 
   const handleModeSelect = (mode: string) => {
-    setModalVisible(false);
-    navigation.navigate('Queue', { mode });
+    hideModal(() => navigation.navigate('Queue', { mode }));
+  };
+
+  const renderModalContent = () => {
+    if (!currentModal) return null;
+
+    let title = '';
+    let buttons: { label: string; onPress: () => void }[] = [];
+
+    if (currentModal === 'type') {
+      title = 'Como deseja jogar?';
+      buttons = [
+        { label: 'Local', onPress: handleLocalPlay },
+        { label: 'Online', onPress: handleOnlinePlay },
+      ];
+    } else if (currentModal === 'online') {
+      title = 'Escolha uma opção online';
+      buttons = [
+        { label: 'Encontrar partida', onPress: handleOnlineOption },
+        { label: 'Encontrar via NFC', onPress: handleOnlineOption },
+      ];
+    } else if (currentModal === 'mode') {
+      title = 'Escolha o modo de jogo';
+      buttons = [
+        { label: 'Modo Clássico', onPress: () => handleModeSelect('classic') },
+        { label: 'Modo Rápido', onPress: () => handleModeSelect('rapid') },
+        { label: 'Modo Blitz', onPress: () => handleModeSelect('blitz') },
+      ];
+    }
+
+    return (
+      <TouchableWithoutFeedback onPress={() => hideModal()}>
+        <Animated.View style={[styles.backdrop, { opacity: backdropOpacity }]}>
+          <TouchableWithoutFeedback>
+            <Animated.View
+              style={[
+                styles.modalContent,
+                {
+                  opacity: modalOpacity,
+                  transform: [{ scale }],
+                },
+              ]}
+            >
+              <Text style={styles.modalTitle}>{title}</Text>
+              {buttons.map((btn, index) => (
+                <TouchableOpacity key={index} style={styles.modalButton} onPress={btn.onPress}>
+                  <Text style={styles.modalButtonText}>{btn.label}</Text>
+                </TouchableOpacity>
+              ))}
+              <TouchableOpacity style={styles.cancelButton} onPress={() => hideModal()}>
+                <Text style={styles.cancelButtonText}>Cancelar</Text>
+              </TouchableOpacity>
+            </Animated.View>
+          </TouchableWithoutFeedback>
+        </Animated.View>
+      </TouchableWithoutFeedback>
+    );
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Chess Game</Text>
-      <Button title="Jogar" onPress={() => setModalVisible(true)} />
+    <ImageBackground
+      source={require('../assets/interface-elements/background.png')}
+      style={styles.background}
+      resizeMode="cover"
+    >
+      <View style={styles.overlay}>
+        <TouchableOpacity style={styles.menuButton} onPress={handlePlay}>
+          <Text style={styles.menuButtonText}>Jogar</Text>
+        </TouchableOpacity>
 
-      <Modal visible={modalVisible} transparent animationType="slide">
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Escolha o modo de jogo</Text>
-            <TouchableOpacity style={styles.button} onPress={() => handleModeSelect('classic')}>
-              <Text style={styles.buttonText}>Modo Clássico</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.button} onPress={() => handleModeSelect('rapid')}>
-              <Text style={styles.buttonText}>Modo Rápido</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.button} onPress={() => handleModeSelect('blitz')}>
-              <Text style={styles.buttonText}>Modo Blitz</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.closeButton} onPress={() => setModalVisible(false)}>
-              <Text>Cancelar</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
-    </View>
+        <TouchableOpacity style={styles.menuButton}>
+          <Text style={styles.menuButtonText}>Ranking</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.menuButton}>
+          <Text style={styles.menuButtonText}>Sobre</Text>
+        </TouchableOpacity>
+      </View>
+
+      {renderModalContent()}
+    </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  title: { fontSize: 24, marginBottom: 20 },
-  modalContainer: { flex: 1, justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.5)' },
-  modalContent: { backgroundColor: 'white', margin: 20, padding: 20, borderRadius: 10 },
-  modalTitle: { fontSize: 18, marginBottom: 10 },
-  button: { padding: 10, backgroundColor: '#007AFF', marginVertical: 5, borderRadius: 5 },
-  buttonText: { color: 'white', textAlign: 'center' },
-  closeButton: { marginTop: 10, alignSelf: 'center' },
+  background: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  overlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 30,
+    gap: 20,
+  },
+  menuButton: {
+    backgroundColor: '#FFE0A1',
+    paddingVertical: 14,
+    paddingHorizontal: 40,
+    borderRadius: 8,
+    width: 180,
+    alignItems: 'center',
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+  },
+  menuButtonText: {
+    fontSize: 16,
+    color: '#4B2E00',
+    fontWeight: 'bold',
+  },
+  backdrop: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 99,
+  },
+  modalContent: {
+    backgroundColor: '#FFF8E7',
+    paddingVertical: 30,
+    paddingHorizontal: 25,
+    borderRadius: 12,
+    width: '85%',
+    alignItems: 'center',
+    elevation: 10,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#4B2E00',
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  modalButton: {
+    backgroundColor: '#FFE0A1',
+    paddingVertical: 12,
+    paddingHorizontal: 30,
+    borderRadius: 8,
+    marginVertical: 8,
+    width: '100%',
+    alignItems: 'center',
+  },
+  modalButtonText: {
+    color: '#4B2E00',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  cancelButton: {
+    marginTop: 20,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+  },
+  cancelButtonText: {
+    color: '#4B2E00',
+    fontSize: 15,
+    textDecorationLine: 'underline',
+  },
 });
