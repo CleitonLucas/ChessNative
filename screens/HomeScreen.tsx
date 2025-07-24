@@ -66,7 +66,6 @@ export default function HomeScreen() {
         if (onHidden) onHidden();
       });
     } else {
-      // Fecha instantaneamente
       backdropOpacity.setValue(0);
       modalOpacity.setValue(0);
       scale.setValue(0.8);
@@ -78,19 +77,24 @@ export default function HomeScreen() {
   const handlePlay = () => showModal('type');
 
   const handleLocalPlay = () => {
-    hideModal(() => showModal('mode'), false); // troca rápida
+    hideModal(() => showModal('mode'), false);
   };
 
   const handleOnlinePlay = () => {
-    hideModal(() => showModal('online'), false); // troca rápida
+    hideModal(() => showModal('online'), false);
   };
 
   const handleOnlineOption = () => {
-    hideModal(() => showModal('mode'), false); // troca rápida
+    hideModal(() => showModal('mode'), false);
   };
 
   const handleModeSelect = (mode: string) => {
     hideModal(() => navigation.navigate('Queue', { mode }));
+  };
+
+  // Corrigido: agora sem parâmetro
+  const goToAbout = () => {
+    hideModal(() => navigation.navigate('About'));
   };
 
   const renderModalContent = () => {
@@ -164,7 +168,7 @@ export default function HomeScreen() {
           <Text style={styles.menuButtonText}>Ranking</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.menuButton}>
+        <TouchableOpacity style={styles.menuButton} onPress={goToAbout}>
           <Text style={styles.menuButtonText}>Sobre</Text>
         </TouchableOpacity>
       </View>
