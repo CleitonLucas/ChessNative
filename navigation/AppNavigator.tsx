@@ -19,7 +19,7 @@ export default function AppNavigator() {
     <NavigationContainer>
       <Stack.Navigator initialRouteName="Home">
         <Stack.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} />
-        <Stack.Screen name="Queue" component={QueueScreen} />
+        <Stack.Screen name="Queue" component={QueueScreen} options={{ headerShown: false}}/>
         <Stack.Screen name="Game" component={GameScreen} options={{ headerShown: false }} />
         
       </Stack.Navigator>
