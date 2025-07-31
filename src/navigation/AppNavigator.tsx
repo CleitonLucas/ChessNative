@@ -11,7 +11,7 @@ export type RootStackParamList = {
   Home: undefined;
   Queue: { mode: string };
   Game: { mode: string };
-  About: undefined; // <-- alterado para undefined
+  About: undefined; 
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
