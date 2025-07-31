@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, StyleSheet, Pressable, ImageBackground } from 'react-native';
-import { Piece } from '../utils/types';
+import { Piece } from '../../utils/types';
 import PieceComponent from './Piece';
 
 interface Props {
