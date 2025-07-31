@@ -1,6 +1,6 @@
 import React from 'react';
 import { Image, StyleSheet, TouchableOpacity } from 'react-native';
-import { Piece } from '../../utils/types';
+import { Piece } from '../utils/types';
 
 interface Props {
   piece: Piece;

@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, StyleSheet, Image, Text, ImageBackground } from 'react-native';
-import { Piece } from '../../utils/types';
-import { getPieceImage } from '../../utils/getPieceImage';
+import { Piece } from '../utils/types';
+import { getPieceImage } from '../utils/getPieceImage';
 
 interface Props {
   pieces: Piece[];

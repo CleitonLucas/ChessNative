@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, StyleSheet, Text, Pressable, Alert, Modal } from 'react-native';
 import Board from '../components/Board';
-import { initialPieces } from '../../utils/initialPieces';
-import { GameMode, Piece } from '../../utils/types';
-import { getValidMoves } from '../../utils/chessLogic';
-import { isCheckmate, isInCheck } from '../../utils/checkLogic';
-import { isStalemate, isFiftyMoveRule } from '../../utils/drawLogic';
+import { initialPieces } from '../utils/initialPieces';
+import { GameMode, Piece } from '../utils/types';
+import { getValidMoves } from '../utils/chessLogic';
+import { isCheckmate, isInCheck } from '../utils/checkLogic';
+import { isStalemate, isFiftyMoveRule } from '../utils/drawLogic';
 import { useRoute } from '@react-navigation/native';
 import { RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../navigation/AppNavigator';
