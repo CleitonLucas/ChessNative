@@ -16,9 +16,9 @@ export default function GameScreen() {
     type GameRouteProp = RouteProp<RootStackParamList, 'Game'>;
 
     const initialTimeByMode: Record<GameMode, number> = {
-        classic: 30 * 60, // 30 minutos
-        rapid: 10 * 60,   // 10 minutos
-        blitz: 3 * 60     // 3 minutos
+        classic: 30 * 60, 
+        rapid: 10 * 60,   
+        blitz: 3 * 60     
     };
 
     const timerRef = useRef<NodeJS.Timeout | null>(null);

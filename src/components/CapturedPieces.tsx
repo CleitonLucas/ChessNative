@@ -10,7 +10,6 @@ interface Props {
 type Grouped = { [key: string]: { piece: Piece; count: number } };
 
 export default function CapturedPieces({ pieces }: Props) {
-  // Agrupa as peças por tipo + cor
   const grouped: Grouped = {};
   for (const piece of pieces) {
     const key = `${piece.color}_${piece.type}`;
@@ -84,7 +83,7 @@ const styles = StyleSheet.create({
     color: '#333',
   },
   kingHighlight: {
-    tintColor: 'red', // Destaque visual para o rei capturado
+    tintColor: 'red', 
   },
   backgroundImage: {
     borderRadius: 14,
